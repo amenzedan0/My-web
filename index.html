@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMEN iT</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,sans-serif}
+body{min-height:100vh;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);background-attachment:fixed;color:#fff;display:flex;flex-direction:column;align-items:center;padding:15px}
+.topbar{width:100%;max-width:750px;display:flex;justify-content:center;align-items:center;margin-bottom:15px;padding:15px 18px;background:rgba(0,0,0,.5);border:2px solid rgba(0,255,204,.4);border-radius:15px;position:relative;z-index:10}
+.brand{font-size:42px;font-weight:900;letter-spacing:6px;background:linear-gradient(135deg,#00ffcc,#00ffff,#0088ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center}
+.settings-btn{position:absolute;left:18px;top:50%;transform:translateY(-50%);background:rgba(0,255,204,.15);border:2px solid #00ffcc;color:#00ffcc;width:42px;height:42px;border-radius:50%;cursor:pointer;font-size:20px}
+.settings-panel{position:fixed;top:100px;left:15px;background:rgba(15,20,45,.98);border:2px solid #00ffcc;border-radius:15px;padding:18px;display:none;z-index:999;min-width:220px}
+.settings-panel.open{display:block}
+.settings-panel label{display:block;margin-bottom:10px;font-size:14px;color:#00ffcc;font-weight:bold}
+.settings-panel input[type=range]{width:100%;accent-color:#00ffcc;margin-bottom:12px}
+.settings-panel .toggle-row{display:flex;align-items:center;gap:8px;color:#fff;font-size:14px}
+.settings-panel input[type=checkbox]{accent-color:#00ffcc;width:18px;height:18px}
+.start-screen{max-width:600px;width:100%;margin-top:60px;padding:50px 30px;background:rgba(255,255,255,.06);border:2px solid rgba(0,255,204,.5);border-radius:25px;text-align:center;box-shadow:0 10px 60px rgba(0,0,0,.6)}
+.start-title{font-size:42px;font-weight:900;background:linear-gradient(135deg,#00ffcc,#0088ff,#ff00cc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:15px;letter-spacing:4px}
+.start-subtitle{font-size:18px;color:#aaa;margin-bottom:30px;line-height:1.6}
+.email-box{margin-bottom:25px;text-align:right}
+.email-box label{display:block;color:#00ffcc;font-size:14px;font-weight:bold;margin-bottom:8px}
+.email-box input{width:100%;padding:15px 18px;border-radius:12px;border:2px solid rgba(0,255,204,.4);background:rgba(0,0,0,.4);color:#fff;font-size:16px;direction:ltr;text-align:left}
+.email-box input:focus{outline:none;border-color:#00ffcc}
+.email-error{color:#ff3355;font-size:13px;margin-top:8px;min-height:18px;font-weight:bold;text-align:right}
+.start-btn{background:linear-gradient(135deg,#00ffcc,#0088ff);color:#000;border:none;padding:20px 60px;border-radius:50px;font-size:22px;font-weight:900;cursor:pointer;letter-spacing:3px}
+.start-btn:hover{transform:scale(1.05)}
+.game{max-width:750px;width:100%;background:rgba(255,255,255,.06);border:2px solid rgba(0,255,204,.4);border-radius:20px;padding:20px;display:none;margin-top:15px}
+.game.active{display:block}
+.header-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px}
+.level-badge{background:linear-gradient(135deg,#00ffcc,#0088ff);color:#000;padding:10px 20px;border-radius:25px;font-weight:900;font-size:15px}
+.coins{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;padding:10px 20px;border-radius:25px;font-weight:900;font-size:15px}
+.progress-bar{width:100%;height:12px;background:rgba(0,0,0,.5);border-radius:10px;overflow:hidden;margin-bottom:20px;border:1px solid rgba(0,255,204,.3)}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00ffcc,#0088ff);width:0%;transition:width .6s}
+.question{font-size:22px;font-weight:bold;text-align:center;margin:25px 0;line-height:1.7;min-height:80px;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,255,204,.05);border-radius:15px;border:1px solid rgba(0,255,204,.2)}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.option{background:rgba(255,255,255,.08);border:2px solid rgba(0,255,204,.4);color:#fff;padding:20px 15px;border-radius:15px;font-size:16px;cursor:pointer;text-align:center;font-weight:bold}
+.option:hover{background:rgba(0,255,204,.2);border-color:#00ffcc}
+.option.correct{background:linear-gradient(135deg,#00ff88,#00aa55);border-color:#00ff88;color:#000}
+.option.wrong{background:linear-gradient(135deg,#ff3355,#aa0022);border-color:#ff3355}
+.option.disabled{pointer-events:none}
+.option.hidden5050{opacity:.2;text-decoration:line-through}
+.help-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.help-btn{background:rgba(0,255,204,.15);border:2px solid #00ffcc;color:#00ffcc;padding:12px 20px;border-radius:12px;cursor:pointer;font-size:14px;font-weight:bold}
+.help-btn:hover:not(:disabled){background:#00ffcc;color:#000}
+.help-btn:disabled{opacity:.3;cursor:not-allowed}
+.levels-section{max-width:750px;width:100%;margin-top:30px;background:rgba(10,15,35,.9);border:2px solid rgba(255,0,150,.3);border-radius:25px;padding:25px;display:none}
+.levels-section.active{display:block}
+.levels-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:2px solid rgba(0,255,204,.2);flex-wrap:wrap;gap:10pxەی}
+.levels-title{font-size:20px;color:#00ffcc;font-weight:900 ک}
+.levels-progress-text{font-size:14px;color:#ffd700;font-weight:bold}
+.levels-grid{display:وردgrid;grid-template-columns:repeat(auto-fill,minmax(55px,1fr));gap:8px;ستانmax-height:450px;overflow-y:auto;padding:10px;background:rgba(0,0,0 ه,.3);border-radius:15px}
+.level-item{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:12px;font-weight:900;font-size:14px;cursor:pointer;border:2px solid transparent}
+.level-item.locked{background:rgba(60,60,80,.6);color:#666;cursor:not-allowed}
+.level-item.locked::after{content:'🔒';font-size:18px}
+.level-item.locked span{display:none}
+.level-item.unlocked{background:linear-gradient(135deg,#00ffcc,#0088ff);color:#000}
+.level-item.current{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;border-color:#fff}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal.open{display:flex}
+.modal-content{background:linear-gradient(135deg,#1a1a2e,#0f3460);border:3px solid #00ffcc;border-radius:25px;padding:35px;text-align:center;max-width:420px;width:100%}
+.modal-content h2{color:#00ffcc;margin-bottom:18px;font-size:26px}
+.modal-content p{margin-bottom:25px;line-height:1.9;font-size:16px}
+.modal-content button{background:linear-gradient(135deg,#00ffcc,#0088ff);border:none;color:#000;padding:14px 35px;border-radius:30px;font-weight:900;cursor:pointer;font-size:16px}
+.user-email-bar{max-width:750px;width:100%;text-align:center;color:#00ffcc;font-size:13px;padding:10px;background:rgba(0,0,0,.3);border-radius:12px;margin-bottom:12px;display:none;border:1px solid rgba(0,255,204,.2)}
+.user-email-bar.active{display:block}
+.user-email-bar b{color:#fff;direction:ltr}
+@media(max-width:550px){.options{grid-template-columns:1fr}.question{font-size:18px;padding:15px}.brand{font-size:28px}.level-item{font-size:12px}.levels-grid{grid-template-columns:repeat(auto-fill,minmax(45px,1fr))}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+  <div class="brand">AMEN iT</div>
+</div>
+
+<div class="settings-panel" id="settingsPanel">
+  <label>🔊 دەنگی ساوند: <span id="volVal">50</span>%</label>
+  <input type="range" id="volume" min="0" max="100" value="50" oninput="changeVolume(this.value)">
+  <div class="toggle-row">
+    <input type="checkbox" id="soundToggle" checked>
+    <span>چالاککردنی ساوند</span>
+  </div>
+</div>
+
+<div class="start-screen" id="startScreen">
+  <div class="start-title">AMEN iT</div>
+  <div class="start-subtitle">یاری بە ئەقل بکات<br>١٠٠٠ پرسیار • ٤ هەڵبژاردن</div>
+  <div class="email-box">
+    <label>📧 ئیمێلەکەت بنووسە:</label>
+    <input type="email" id="emailInput" placeholder="example@gmail.com" dir="ltr">
+    <div class="email-error" id="emailError"></div>
+  </div>
+  <button class="start-btn" id="startBtn">▶ START</button>
+  <div class="info-box" style="display:flex;justify-content:center;gap:30px;margin-top:35px;flex-wrap:wrap">
+    <div style="font-size:14px;color:#00ffcc"><b style="display:block;font-size:24px;color:#fff;margin-bottom:5px">1000</b>پرسیار</div>
+    <div style="font-size:14px;color:#00ffcc"><b style="display:block;font-size:24px;color:#fff;margin-bottom:5px">4</b>هەڵبژاردن</div>
+    <div style="font-size:14px;color:#00ffcc"><b style="display:block;font-size:24px;color:#fff;margin-bottom:5px">+20</b>کۆین</div>
+  </div>
+</div>
+
+<div class="user-email-bar" id="userEmailBar">
+  👤 بەکارهێنەر: <b id="userEmailDisplay"></b>
+</div>
+
+<div class="game" id="gameScreen">
+  <div class="header-info">
+    <div class="level-badge">مەرحەلە: <span id="levelNum">1</span> / 1000</div>
+    <div class="coins">💰 <span id="coinNum">0</span></div>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <div class="question" id="questionText">بارکردن...</div>
+  <div class="options" id="optionsBox"></div>
+  <div class="help-row">
+    <button class="help-btn" id="help5050">50:50 (20💰)</button>
+    <button class="help-btn" id="helpSkip">⏭️ بازدان (30💰)</button>
+  </div>
+</div>
+
+<div class="levels-section" id="levelsSection">
+  <div class="levels-header">
+    <div class="levels-title">🗺️ هەموو مەرحەلەکان</div>
+    <div class="levels-progress-text">🔓 <span id="unlockedCount">1</span> / 1000</div>
+  </div>
+  <div class="levels-grid" id="levelsGrid"></div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle"></h2>
+    <p id="modalText"></p>
+    <button onclick="closeModal()">باشە</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   بانکی پرسیار
+   ============================================================ */
+var questionBank = [];
+
+// کوردستان
+var kurdistanQs = [
+  {q:"پایتەختی هەرێمی کوردستان کام شارە؟",a:"هەولێر",w:["سلێمانی","دهۆک","کەرکوک"]},
+  {q:"چەند پارچەیە؟",a:"4",w:["2","3","5"]},
+  {q:"کوردستان بەشێکە لە کام کیشوەر؟",a:"ئاسیا",w:["ئەوروپا","ئەفریقا","ئوسترالیا"]},
+  {q:"کام شاعیری کورد بە شاعیری نەتەوەیی ناسراوە؟",a:"پیرەمێرد",w:["شێرکۆ بێکەس","عەبدوڵا پەشێو","گۆران"]},
+  {q:"کام چیای کوردستان بەرزترینە؟",a:"چیای قەندیل",w:["چیای سەفوون","چیای هەڵگورد","چیای ئاگری"]},
+  {q:"کام ساڵ کۆماری مەهاباد دامەزرا؟",a:"1946",w:["1920","1960","1970"]},
+  {q:"کام جەژنی کوردی نەتەوەیی هەیە؟",a:"نەورۆز",w:["ڕەمەزان","قوربان","جەژنی سوپاس"]},
+  {q:"کام خواردنی کوردی نەتەوەییە؟",a:"دۆڵمە",w:["پیزا","بورگەر","سوشی"]},
+  {q:"کام دەریاچەی کوردستان گەورەترینە؟",a:"دوکان",w:["دربەندێخان","سەید صادق","حەمرین"]},
+  {q:"کام شاری کوردستان ناوەندی سیاسییە؟",a:"هەولێر",w:["سلێمانی","دهۆک","کەرکوک"]}
+];
+
+// وڵاتان
+var countriesData = [
+  ["عێراق","بەغدا"],["تورکیا","ئەنقەرە"],["ئێران","تاران"],["سعودیە","ڕیاز"],
+  ["میسر","قاهیرە"],["فەرەنسا","پاریس"],["ئەڵمانیا","بەرلین"],["ئیتاڵیا","ڕۆما"],
+  ["ئیسپانیا","مەدرید"],["بەریتانیا","لەندەن"],["ئەمریکا","واشنتۆن"],["کەنەدا","ئۆتاوا"],
+  ["بەڕازیل","برازیلیا"],["ژاپۆن","تۆکیۆ"],["چین","پەکین"],["هیندستان","نیو دهلی"],
+  ["ڕووسیا","مۆسکۆ"],["ئوسترالیا","کانبێرا"],["هۆڵەندا","ئەمستەردام"],["بەلجیکا","بروکسێل"],
+  ["سویس","بێرن"],["نەمسا","ڤیەنا"],["پۆڵەندا","وارشۆ"],["یۆنان","ئەتینا"],
+  ["پورتوگال","لیسبۆن"],["سوید","ستۆکهۆڵم"],["نەرویژ","ئۆسلۆ"],["دانیمارک","کۆپنهاگن"],
+  ["فینلەند","هێلسینکی"],["ئێرلەندا","دوبلین"],["مەکسیک","مەکسیکۆ سیتی"],["کووبا","هاڤانا"],
+  ["کۆریای باشوور","سیئۆل"],["تایلەند","بانکۆک"],["ڤیەتنام","هانۆی"],["ئیندۆنیزیا","جاکارتا"],
+  ["مالیزیا","کوالا لامپور"],["پاکستان","ئیسلام ئاباد"],["ئەفغانستان","کابول"],["نیجیریا","ئەبوجا"],
+  ["کینیا","نایرۆبی"],["مەغریب","ڕەبات"],["جەزائیر","جەزائیر"],["توونس","توونس"],
+  ["لیبیا","تریپۆلی"],["ئوردن","عەممان"],["لوبنان","بەیروت"],["سوریا","دیمەشق"],
+  ["یەمەن","سەنعا"],["عومان","مەسقەت"],["کوەیت","کوەیت سیتی"],["قەتەر","دەوحە"],
+  ["بەحرەین","مەنامە"],["ئیمارات","ئەبو زەبی"],["بەنگلادیش","داکا"],["سریلانکا","کۆلۆمبۆ"],
+  ["نیپال","کاتماندو"],["میانمار","نایپیداو"],["کەمبۆدیا","پنۆم پێن"],["مەنگۆلیا","ئولانباتۆر"],
+  ["کازاخستان","ئاستانا"],["ئوزبەکستان","تاشکەند"],["تورکمانستان","ئاشقاباد"],["قرغیزستان","بیشکەک"],
+  ["تاجیکستان","دوشەنبە"],["ئازەربایجان","باکو"],["ئەرمەنستان","یەریڤان"],["جۆرجیا","تبلیس"],
+  ["ئوکراینا","کیێڤ"],["بیلاڕووس","مینسک"],["لیتوانیا","ڤیلنیوس"],["لاتڤیا","ریگا"],
+  ["ئیستۆنیا","تالین"],["ڕۆمانیا","بوخارێست"],["بولگاریا","سۆفیا"],["مەجارستان","بوداپێست"],
+  ["چیک","پراگ"],["سلۆڤاکیا","براتیسلاڤا"],["سلۆڤێنیا","لیوبلیانا"],["کرواتیا","زاگرێب"],
+  ["سربیا","بێلگراد"],["ئالبانیا","تیرانا"]
+];
+
+// زانست
+var scienceQs = [
+  {q:"ئاوی ژیان چییە؟",a:"H2O",w:["O2","CO2","NaCl"]},
+  {q:"کام گاز لە هەوادا زۆرترینە؟",a:"نایترۆجین",w:["ئۆکسجین","کاربۆن دیۆکساید","ئارگۆن"]},
+  {q:"کام ئەندام خوێن پاڵدەنێت؟",a:"دڵ",w:["مێشک","جگەر","گورچیلە"]},
+  {q:"چەند ئێسک لە جەستەی مرۆڤدا هەیە؟",a:"206",w:["150","250","300"]},
+  {q:"کام هەسارە گەورەترینە؟",a:"موشتەری",w:["زەوی","ساتورن","نێپتۆن"]},
+  {q:"کام هەسارە بە سوور ناسراوە؟",a:"مەریخ",w:["ڤینوس","عەتارد","موشتەری"]},
+  {q:"چەند هەسارە لە کۆمەڵەی خۆردا هەیە؟",a:"8",w:["7","9","10"]},
+  {q:"کام هەسارە نزیکترینە لە خۆر؟",a:"عەتارد",w:["زەوی","موشتەری","ڤینوس"]},
+  {q:"گەورەترین بیابان؟",a:"بیابانی مەزن",w:["گۆبی","سەحرا","کاڵاهاری"]},
+  {q:"کام ڕووبار درێژترینە؟",a:"نیل",w:["ئەمازۆن","میسیسیپی","یانگتسێ"]},
+  {q:"کام ڕەنگ لە سوور و زەرد دروست دەبێت؟",a:"پیرتەقاڵی",w:["سەوز","مۆر","شین"]},
+  {q:"کام ڕەنگ لە شین و زەرد دروست دەبێت؟",a:"سەوز",w:["مۆر","پیرتەقاڵی","قاوەیی"]},
+  {q:"کام ڕەنگ لە سوور و شین دروست دەبێت؟",a:"مۆر",w:["سەوز","پیرتەقاڵی","زەرد"]},
+  {q:"چەند ڕەنگ لە پەلکەزێڕینەدا هەیە؟",a:"7",w:["5","6","8"]},
+  {q:"کام پلەی گەرمی ئاو دەکوڵێت؟",a:"100°C",w:["0°C","50°C","200°C"]},
+  {q:"کام پلەی گەرمی ئاو دەبەستێت؟",a:"0°C",w:["100°C","-10°C","10°C"]},
+  {q:"کام ڤیتامین لە پرتەقاڵدا هەیە؟",a:"C",w:["A","D","K"]},
+  {q:"چەند وەرز لە ساڵێکدا هەیە؟",a:"4",w:["2","3","5"]},
+  {q:"چەند مانگ لە ساڵێکدا هەیە؟",a:"12",w:["10","11","13"]},
+  {q:"چەند ڕۆژ لە ساڵێکی ئاساییدا هەیە؟",a:"365",w:["360","370","300"]},
+  {q:"چەند کاتژمێر لە ڕۆژێکدا هەیە؟",a:"24",w:["12","20","30"]},
+  {q:"چەند خولەک لە کاتژمێرێکدا هەیە؟",a:"60",w:["30","90","100"]},
+  {q:"کام ئاژەڵ بە پاشای دارستان ناسراوە؟",a:"شێر",w:["پڵنگ","ورچ","گورگ"]},
+  {q:"کام ئاژەڵ زۆرترین خەو دەکات؟",a:"کۆالا",w:["پشیلە","شێر","فیل"]},
+  {q:"کام ئاژەڵ بەرزترین دەفڕێت؟",a:"عوقاب",w:["داڵ","کەشەپ","پەپوو"]},
+  {q:"کام ئاژەڵ گەورەترین مێشکی هەیە؟",a:"نەهەنگ",w:["فیل","مرۆڤ","دۆلفین"]},
+  {q:"کام دار بەرزترینە؟",a:"سیکۆیا",w:["داربەڕوو","داربلووت","دارئەکاسیا"]},
+  {q:"کام ئاژەڵ گەورەترین گوێی هەیە؟",a:"فیل",w:["کەروێشک","ئەسپ","مانگا"]},
+  {q:"کام ئاژەڵ درێژترین مل هەیە؟",a:"زرافە",w:["فیل","نەهەنگ","ئەسپ"]},
+  {q:"کام ئاژەڵ زیرەکترینە؟",a:"دۆلفین",w:["شیمپانزی","فیل","کەشەپ"]},
+  {q:"کام باڵندە گەورەترینە؟",a:"ئۆستریچ",w:["عوقاب","کرەین","قاز"]},
+  {q:"کام ماسی گەورەترینە؟",a:"نەهەنگی شین",w:["شارکی سپی","دۆلفین","ئۆرکا"]},
+  {q:"کام ئاژەڵ درێژترین زمان هەیە؟",a:"کەمێلیۆن",w:["مار","قورباغە","کیسەڵ"]},
+  {q:"کام گاز ئۆکسجینە؟",a:"O2",w:["CO2","N2","H2"]},
+  {q:"کام گاز کاربۆن دیۆکسایدە؟",a:"CO2",w:["O2","N2","H2"]},
+  {q:"کام گاز نایترۆجینە؟",a:"N2",w:["O2","CO2","H2"]},
+  {q:"کام گاز هایدرۆجینە؟",a:"H2",w:["O2","CO2","N2"]},
+  {q:"کام شت بۆ پێوانەی گەرمی بەکاردێت؟",a:"تێرمۆمیتەر",w:["بارۆمیتەر","ئەمیتەر","ڤۆڵتمیتەر"]},
+  {q:"کام زانای فیزیک یاسای کێشکردن دۆزییەوە؟",a:"نیوتن",w:["ئەنیشتاین","گالیلی","ئەرستۆ"]},
+  {q:"کام زانای فیزیک بیردۆزی ڕێژەیی دۆزییەوە؟",a:"ئەنیشتاین",w:["نیوتن","گالیلی","ئەرستۆ"]},
+  {q:"کام زانای ژیانناسی بیردۆزی پەرەسەندنی دانا؟",a:"داروین",w:["لامارک","مندل","هاکسلی"]},
+  {q:"چەند کرۆمۆسۆم لە مرۆڤدا هەیە؟",a:"46",w:["23","44","48"]},
+  {q:"کام پلەی گەرمی جەستەی مرۆڤی ئاساییە؟",a:"37°C",w:["30°C","40°C","45°C"]},
+  {q:"کام خواردن زۆرترین کالسیۆم هەیە؟",a:"شیر",w:["گۆشت","برنج","سێو"]},
+  {q:"کام میوە زۆرترین ڤیتامین C هەیە؟",a:"پرتەقاڵ",w:["سێو","مۆز","ترێ"]},
+  {q:"چەند ددان لە مرۆڤی گەورەدا هەیە؟",a:"32",w:["28","30","36"]},
+  {q:"خێراترین شت لە جیهاندا؟",a:"ڕووناکی",w:["دەنگ","کارەبا","ئاو"]},
+  {q:"کام وڵات زۆرترین نەوت هەیە؟",a:"ڤەنزوێلا",w:["سعودیە","ڕووسیا","ئەمریکا"]},
+  {q:"کام ئەندام بۆ هەناسەدانە؟",a:"سییەکان",w:["دڵ","جگەر","گورچیلە"]},
+  {q:"کام ئەندام بۆ بیرکردنەوەیە؟",a:"مێشک",w:["دڵ","جگەر","گەدە"]}
+];
+
+// جوگرافیا
+var geoQs = [
+  {q:"گەورەترین کیشوەر؟",a:"ئاسیا",w:["ئەفریقا","ئەوروپا","ئەمریکا"]},
+  {q:"بچوکترین کیشوەر؟",a:"ئوسترالیا",w:["ئەوروپا","ئەنترکتیکا","ئەمریکای باشوور"]},
+  {q:"کام دەریا گەورەترینە؟",a:"دەریای هێمن",w:["ئەتڵەسی","هیندی","ڕەش"]},
+  {q:"کام کیشوەر دووەم گەورەترینە؟",a:"ئەفریقا",w:["ئەوروپا","ئەمریکا","ئاسیا"]},
+  {q:"کام کیشوەر سەردترینە؟",a:"ئەنترکتیکا",w:["ئەوروپا","ئاسیا","ئەمریکا"]},
+  {q:"کام کیشوەر گەرمترینە؟",a:"ئەفریقا",w:["ئاسیا","ئوسترالیا","ئەمریکای باشوور"]},
+  {q:"کام وڵات زۆرترین دانیشتووی هەیە؟",a:"هیندستان",w:["چین","ئەمریکا","ئیندۆنیزیا"]},
+  {q:"کام وڵات گەورەترینە لە ڕووبەر؟",a:"ڕووسیا",w:["کانادا","چین","ئەمریکا"]},
+  {q:"کام وڵات بچوکترینە لە ڕووبەر؟",a:"ڤاتیکان",w:["مۆناکۆ","سان مارینۆ","لیختنشتاین"]},
+  {q:"کام وڵات بەرزترین چیای هەیە؟",a:"نیپال",w:["چین","هیندستان","پاکستان"]},
+  {q:"کام وڵات درێژترین ڕووباری هەیە؟",a:"میسر",w:["بەڕازیل","چین","ئەمریکا"]},
+  {q:"کام وڵات بەرزترین بینای هەیە؟",a:"ئیمارات",w:["ئەمریکا","چین","سعودیە"]},
+  {q:"کام وڵات زۆرترین گڕکانی هەیە؟",a:"ئیندۆنیزیا",w:["ژاپۆن","ئەمریکا","ئایسلەند"]},
+  {q:"کام وڵات زۆرترین بوومەلەرزەی هەیە؟",a:"ژاپۆن",w:["ئیندۆنیزیا","ئەمریکا","چین"]},
+  {q:"کام وڵات زۆرترین گەرمی هەیە؟",a:"کوەیت",w:["عێراق","سعودیە","لیبیا"]},
+  {q:"کام دەریاچە شورترینە؟",a:"دەریای مردوو",w:["دەریاچەی شور","دەریاچەی باکوور","دەریاچەی هێمن"]},
+  {q:"کام دەریاچە قووڵترینە؟",a:"بایکال",w:["سوپیریۆر","تانگانیکا","کاسپیەن"]},
+  {q:"کام دەریاچە گەورەترینە؟",a:"کاسپیەن",w:["سوپیریۆر","ڤیکتۆریا","هیورۆن"]},
+  {q:"کام دەریاچە بەرزترینە؟",a:"تیتیکاکا",w:["بایکال","سوپیریۆر","ڤیکتۆریا"]},
+  {q:"کام وڵات زۆرترین زێڕی هەیە؟",a:"ئەمریکا",w:["چین","ڕووسیا","هیندستان"]},
+  {q:"کام وڵات زۆرترین دەریاچەی هەیە؟",a:"کانادا",w:["ڕووسیا","فینلەند","سوید"]},
+  {q:"کام وڵات درێژترین کەناراوەی هەیە؟",a:"کانادا",w:["ڕووسیا","ئیندۆنیزیا","ئوسترالیا"]},
+  {q:"کام وڵات زۆرترین دارستانی هەیە؟",a:"ڕووسیا",w:["بەڕازیل","کانادا","ئەمریکا"]},
+  {q:"کام وڵات زۆرترین باران دەبارێت؟",a:"هیندستان",w:["بەڕازیل","ئیندۆنیزیا","بەنگلادیش"]}
+];
+
+// وەرزش
+var sportsQs = [
+  {q:"چەند یاریزان لە تیمێکی تۆپی پێدا هەیە؟",a:"11",w:["9","10","12"]},
+  {q:"چەند یاریزان لە تیمێکی باسکەدا هەیە؟",a:"5",w:["6","7","8"]},
+  {q:"کام وڵات جامی جیهانی 2022 بردەوە؟",a:"ئەرجەنتین",w:["فەرەنسا","بەڕازیل","ئەڵمانیا"]},
+  {q:"کام وڵات زۆرترین جامی جیهانی هەیە؟",a:"بەڕازیل",w:["ئەڵمانیا","ئیتاڵیا","ئەرجەنتین"]},
+  {q:"کام یاریزان بە GOAT ناسراوە؟",a:"مێسی",w:["ڕۆناڵدۆ","نەیمار","مباپێ"]},
+  {q:"چەند خولەک لە یاری تۆپی پێدا هەیە؟",a:"90",w:["60","80","120"]},
+  {q:"چەند چارەکی لە یاری باسکەدا هەیە؟",a:"4",w:["2","3","5"]},
+  {q:"چەند بازنەی لە ئەڵقەی ئۆڵۆمپیاددا هەیە؟",a:"5",w:["3","4","6"]},
+  {q:"چەند خانە لە شەترەنجدا هەیە؟",a:"64",w:["36","49","81"]},
+  {q:"چەند پارچە لە شەترەنجدا هەیە؟",a:"32",w:["16","24","48"]},
+  {q:"چەند جۆری پارچە لە شەترەنجدا هەیە؟",a:"6",w:["4","5","7"]},
+  {q:"کام وەرزش بە تۆپێکی بچووک دەکرێت؟",a:"تێنیس",w:["تۆپی پێ","باسکە","ڤۆلی"]},
+  {q:"لە کام شار ئۆڵۆمپیادی 2020 بەڕێوەچوو؟",a:"تۆکیۆ",w:["پاریس","لەندەن","ڕیۆ"]},
+  {q:"کام وەرزش لە ئاودا دەکرێت؟",a:"مەلەوانی",w:["تۆپی پێ","باسکە","تێنیس"]},
+  {q:"کام وەرزش بە شمشێر دەکرێت؟",a:"شمشێربازی",w:["تۆپی پێ","باسکە","تێنیس"]},
+  {q:"کام وەرزش بە مست دەکرێت؟",a:"بۆکس",w:["تۆپی پێ","باسکە","تێنیس"]}
+];
+
+// مێژوو
+var historyQs = [
+  {q:"شەڕی جیهانی یەکەم کەی دەستیپێکرد؟",a:"1914",w:["1900","1920","1939"]},
+  {q:"شەڕی جیهانی دووەم کەی کۆتاییهات؟",a:"1945",w:["1939","1950","1960"]},
+  {q:"کام ساڵ ئەمریکا سەربەخۆیی ڕاگەیاند؟",a:"1776",w:["1700","1800","1850"]},
+  {q:"کام ساڵ شۆڕشی فەرەنسا ڕوویدا؟",a:"1789",w:["1750","1800","1850"]},
+  {q:"کێ دۆزەرەوەی ئەمریکا بوو؟",a:"کۆلۆمبۆس",w:["ماگلان","ڤاسکۆ دا گاما","کاپتن کۆک"]},
+  {q:"کێ یەکەم مرۆڤ چووە سەر مانگ؟",a:"نیل ئارمسترۆنگ",w:["باز ئاڵدرین","یوری گاگارین","جۆن گلین"]},
+  {q:"کام وڵات یەکەم مرۆڤی ناردە بۆشایی؟",a:"یەکێتی سۆڤیەت",w:["ئەمریکا","چین","فەرەنسا"]},
+  {q:"کام ساڵ دیواری بەرلین ڕووخا؟",a:"1989",w:["1975","1991","2000"]},
+  {q:"کام ساڵ یەکێتی سۆڤیەت هەڵوەشا؟",a:"1991",w:["1985","1995","2000"]},
+  {q:"کێ یەکەم سەرۆکی ئەمریکا بوو؟",a:"جۆرج واشنتۆن",w:["ئەبراهام لینکن","تۆماس جێفەرسۆن","جۆن ئادەمز"]},
+  {q:"کێ یەکەم خەلیفەی ئیسلام بوو؟",a:"ئەبووبەکر",w:["عومەر","عوسمان","عەلی"]},
+  {q:"کێ دووەم خەلیفەی ئیسلام بوو؟",a:"عومەر",w:["ئەبووبەکر","عوسمان","عەلی"]},
+  {q:"کێ سێیەم خەلیفەی ئیسلام بوو؟",a:"عوسمان",w:["ئەبووبەکر","عومەر","عەلی"]},
+  {q:"کێ چوارەم خەلیفەی ئیسلام بوو؟",a:"عەلی",w:["ئەبووبەکر","عومەر","عوسمان"]},
+  {q:"کام ساڵ پێغەمبەر محەممەد لەدایکبوو؟",a:"570",w:["500","600","650"]},
+  {q:"کام ساڵ پێغەمبەر محەممەد کۆچی کرد؟",a:"622",w:["600","610","630"]},
+  {q:"کام ساڵ پێغەمبەر محەممەد کۆچی دوایی کرد؟",a:"632",w:["620","625","640"]},
+  {q:"کام ساڵ ئیمپراتۆریەتی عوسمانی دامەزرا؟",a:"1299",w:["1200","1300","1400"]},
+  {q:"کام ساڵ قوستەنتینیە فەتح کرا؟",a:"1453",w:["1400","1500","1350"]},
+  {q:"کێ قوستەنتینیەی فەتح کرد؟",a:"محەممەدی دووەم",w:["سولەیمانی مەزن","بایەزیدی یەکەم","ئورخانی یەکەم"]},
+  {q:"کام ساڵ ئیمپراتۆریەتی عوسمانی هەڵوەشا؟",a:"1922",w:["1900","1918","1930"]},
+  {q:"کێ دامەزرێنەری کۆماری تورکیا بوو؟",a:"کەمال ئاتاتورک",w:["محەممەدی شەشەم","عەبدولحەمیدی دووەم","ئەنوەر پاشا"]},
+  {q:"کام ساڵ کۆماری تورکیا دامەزرا؟",a:"1923",w:["1918","1920","1930"]}
+];
+
+// ئەدەب
+var artsQs = [
+  {q:"کێ نوسیوە شاهنامە؟",a:"فیردەوسی",w:["حافز","سەعدی","ڕومی"]},
+  {q:"کێ نوسیوە مەسنەوی؟",a:"ڕومی",w:["حافز","سەعدی","فیردەوسی"]},
+  {q:"کێ نوسیوە گوڵستان؟",a:"سەعدی",w:["حافز","ڕومی","فیردەوسی"]},
+  {q:"کێ نوسیوە دیوانی حافز؟",a:"حافز",w:["سەعدی","ڕومی","فیردەوسی"]},
+  {q:"کێ نوسیوە مقدمة؟",a:"ئیبن خەلدون",w:["فیردەوسی","ڕومی","سەعدی"]},
+  {q:"کێ نوسیوە قانون فی الطب؟",a:"ئیبن سینا",w:["ڕازی","ئیبن ڕوشد","ئیبن نەفیس"]},
+  {q:"کێ نوسیوە حاوی؟",a:"ڕازی",w:["ئیبن سینا","ئیبن ڕوشد","ئیبن نەفیس"]},
+  {q:"کێ نوسیوە کتاب الشفا؟",a:"ئیبن سینا",w:["ڕازی","ئیبن ڕوشد","ئیبن نەفیس"]},
+  {q:"کێ نوسیوە احیاء علوم الدین؟",a:"غەزالی",w:["ڕازی","ئیبن سینا","ئیبن ڕوشد"]},
+  {q:"کێ نوسیوە تاریخ الرسل والملوک؟",a:"تەبەری",w:["ئیبن خەلدون","مەسعودی","یەعقوبی"]},
+  {q:"کێ نوسیوە مروج الذهب؟",a:"مەسعودی",w:["تەبەری","ئیبن خەلدون","یەعقوبی"]},
+  {q:"کێ نوسیوە کتاب الحیوان؟",a:"جاحظ",w:["تەبەری","ئیبن خەلدون","مەسعودی"]},
+  {q:"کێ نوسیوە لسان العرب؟",a:"ئیبن مەنزوور",w:["جەوهەری","ئیبن جەنی","سیبەوەیهی"]},
+  {q:"کێ نوسیوە الإتقان؟",a:"سویوطی",w:["ئیبن فارس","زەبیدی","فیروزئابادی"]},
+  {q:"کێ نوسیوە البدایة والنهایة؟",a:"ئیبن کەسیر",w:["سویوطی","ئیبن فارس","زەبیدی"]}
+];
+
+// ئایین
+var religionQs = [
+  {q:"چەند کتێبی ئاسمانی هەیە؟",a:"4",w:["3","5","6"]},
+  {q:"کام کتێبی ئاسمانی بۆ موسا نێردراوە؟",a:"تەورات",w:["ئینجیل","زەبوور","قورئان"]},
+  {q:"کام کتێبی ئاسمانی بۆ عیسا نێردراوە؟",a:"ئینجیل",w:["تەورات","زەبوور","قورئان"]},
+  {q:"کام کتێبی ئاسمانی بۆ محەممەد نێردراوە؟",a:"قورئان",w:["تەورات","ئینجیل","زەبوور"]},
+  {q:"چەند سورەت لە قورئاندا هەیە؟",a:"114",w:["100","120","130"]},
+  {q:"چەند جوزء لە قورئاندا هەیە؟",a:"30",w:["20","40","50"]},
+  {q:"کام درێژترین سورەت لە قورئاندا؟",a:"بەقەرە",w:["ئالی عیمران","نیسا","مائیدە"]},
+  {q:"کام کورتترین سورەت لە قورئاندا؟",a:"کوەسەر",w:["ئیخلاس","فەلق","ناس"]},
+  {q:"کام سورەت بە دڵی قورئان ناسراوە؟",a:"یاسین",w:["فاتیحە","بەقەرە","کوەسەر"]},
+  {q:"چەند ڕوکن لە ئیسلامدا هەیە؟",a:"5",w:["3","4","6"]},
+  {q:"چەند ڕوکن لە ئیماندا هەیە؟",a:"6",w:["4","5","7"]},
+  {q:"چەند نوێژی فەرز لە ڕۆژێکدا هەیە؟",a:"5",w:["3","4","6"]},
+  {q:"کام مانگ مانگی ڕۆژووە؟",a:"ڕەمەزان",w:["شەعبان","ڕەجەب","شەوال"]},
+  {q:"کام شوێن حەج تێدا ئەکرێت؟",a:"مەککە",w:["مەدینە","قودس","تائیف"]},
+  {q:"کام شوێن گۆڕی پێغەمبەرە؟",a:"مەدینە",w:["مەککە","قودس","تائیف"]}
+];
+
+// زمان
+var langQs = [
+  {q:"چەند پیتی ئەلفوبێی کوردی هەیە؟",a:"34",w:["28","30","32"]},
+  {q:"چەند پیتی ئەلفوبێی عەرەبی هەیە؟",a:"28",w:["26","30","32"]},
+  {q:"چەند پیتی ئەلفوبێی ئینگلیزی هەیە؟",a:"26",w:["24","28","30"]},
+  {q:"کام زمان زۆرترین قسەکەری هەیە؟",a:"چینی",w:["ئینگلیزی","هیندی","ئیسپانی"]},
+  {q:"چەند زمانی فەرمی نەتەوە یەکگرتووەکان هەیە؟",a:"6",w:["4","5","7"]},
+  {q:"چەند شێوەزاری کوردی هەیە؟",a:"3",w:["2","4","5"]},
+  {q:"کام شێوەزاری کوردی زۆرترین قسەکەری هەیە؟",a:"کرمانجی",w:["سۆرانی","هەورامی","زازاکی"]},
+  {q:"کام شێوەزاری کوردی لە باشوور قسەی پێدەکرێت؟",a:"سۆرانی",w:["کرمانجی","هەورامی","زازاکی"]},
+  {q:"چەند زمان لە جیهاندا هەیە؟",a:"7000",w:["1000","3000","5000"]},
+  {q:"کام زمان کۆنترینە؟",a:"سومەری",w:["عەرەبی","یۆنانی","لاتینی"]}
+];
+
+// گشتی
+var generalQs = [
+  {q:"چەند پەنجە لە دەستێکدا هەیە؟",a:"5",w:["4","6","10"]},
+  {q:"چەند پێ لە مرۆڤێکدا هەیە؟",a:"2",w:["1","3","4"]},
+  {q:"چەند چاو لە مرۆڤێکدا هەیە؟",a:"2",w:["1","3","4"]},
+  {q:"چەند گوێ لە مرۆڤێکدا هەیە؟",a:"2",w:["1","3","4"]},
+  {q:"کام ڕەنگی خوێنە؟",a:"سوور",w:["شین","سەوز","زەرد"]},
+  {q:"کام ڕەنگی ئاسمانە؟",a:"شین",w:["سوور","سەوز","زەرد"]},
+  {q:"کام ڕەنگی خۆرە؟",a:"زەرد",w:["سوور","شین","سەوز"]},
+  {q:"کام ڕەنگی گیا سەوزە؟",a:"سەوز",w:["سوور","شین","زەرد"]},
+  {q:"کام ڕەنگی بەفر سپیە؟",a:"سپی",w:["ڕەش","سوور","شین"]},
+  {q:"کام وڵات زۆرترین گازی سروشتی هەیە؟",a:"ڕووسیا",w:["ئێران","قەتەر","ئەمریکا"]},
+  {q:"کام وڵات زۆرترین مس هەیە؟",a:"چیلی",w:["پێرو","چین","ئەمریکا"]},
+  {q:"کام وڵات زۆرترین ئاسنی هەیە؟",a:"ئوسترالیا",w:["بەڕازیل","چین","هیندستان"]},
+  {q:"کام وڵات زۆرترین خەڵووزی هەیە؟",a:"چین",w:["ئەمریکا","هیندستان","ئوسترالیا"]},
+  {q:"کام وڵات زۆرترین برنج بەرهەمدەهێنێت؟",a:"چین",w:["هیندستان","ئیندۆنیزیا","بەنگلادیش"]}
+];
+
+/* ============================================================
+   کۆکردنەوەی پرسیارەکان
+   ============================================================ */
+// زیادکردنی پایتەختی وڵاتان
+for (var ci = 0; ci < countriesData.length; ci++) {
+  var c = countriesData[ci];
+  var wrongCaps = [];
+  for (var wj = 0; wj < countriesData.length && wrongCaps.length < 3; wj++) {
+    if (countriesData[wj][1] !== c[1]) {
+      wrongCaps.push(countriesData[wj][1]);
+    }
+  }
+  questionBank.push({
+    q: "پایتەختی " + c[0] + " کام شارە؟",
+    a: c[1],
+    w: wrongCaps
+  });
+}
+
+// زیادکردنی پرسیارەکان
+var allQ = [kurdistanQs, scienceQs, geoQs, sportsQs, historyQs, artsQs, religionQs, langQs, generalQs];
+for (var ai = 0; ai < allQ.length; ai++) {
+  for (var qi = 0; qi < allQ[ai].length; qi++) {
+    questionBank.push(allQ[ai][qi]);
+  }
+}
+
+// زیادکردنی پرسیاری بیرکاری
+var mathIdx = 0;
+for (var mi = 1; mi <= 500 && mathIdx < 500; mi++) {
+  var seed = mi * 17 + 23;
+  var n1 = (seed % 80) + 5;
+  var n2 = ((seed * 3) % 60) + 3;
+  var type = mi % 5;
+  var qText, ans, wrongs;
+  
+  if (type === 0) {
+    ans = n1 + n2;
+    qText = n1 + " + " + n2 + " چەندە؟";
+    wrongs = [String(ans+1), String(ans-1), String(ans+2)];
+  } else if (type === 1) {
+    var big = Math.max(n1, n2);
+    var small = Math.min(n1, n2);
+    ans = big - small;
+    qText = big + " - " + small + " چەندە؟";
+    wrongs = [String(ans+1), String(ans-1), String(ans+3)];
+  } else if (type === 2) {
+    var m1 = (seed % 15) + 2;
+    var m2 = ((seed * 3) % 15) + 2;
+    ans = m1 * m2;
+    qText = m1 + " × " + m2 + " چەندە؟";
+    wrongs = [String(ans+m1), String(ans-m2), String(ans+1)];
+  } else if (type === 3) {
+    var d2 = ((seed * 7) % 12) + 2;
+    var r = ((seed * 11) % 12) + 2;
+    ans = r;
+    qText = (d2*r) + " ÷ " + d2 + " چەندە؟";
+    wrongs = [String(ans+1), String(ans-1), String(ans+2)];
+  } else {
+    ans = n1 + n2 - 1;
+    qText = n1 + " + " + n2 + " - 1 چەندە؟";
+    wrongs = [String(ans+1), String(ans-1), String(ans+2)];
+  }
+  
+  var isDup = false;
+  for (var di = 0; di < questionBank.length; di++) {
+    if (questionBank[di].q === qText) { isDup = true; break; }
+  }
+  if (!isDup) {
+    questionBank.push({ q: qText, a: String(ans), w: wrongs });
+    mathIdx++;
+  }
+}
+
+// ئەگەر کەمتر بوو لە ١٠٠٠
+var extra = 10000;
+while (questionBank.length < 1000) {
+  var en1 = (extra * 19) % 900 + 100;
+  var en2 = (extra * 31) % 500 + 50;
+  var ea = en1 + en2;
+  var eq = en1 + " + " + en2 + " چەندە؟";
+  var isDup2 = false;
+  for (var di2 = 0; di2 < questionBank.length; di2++) {
+    if (questionBank[di2].q === eq) { isDup2 = true; break; }
+  }
+  if (!isDup2) {
+    questionBank.push({ q: eq, a: String(ea), w: [String(ea+1), String(ea-1), String(ea+2)] });
+  }
+  extra++;
+}
+
+// تێکەڵکردن
+for (var si = questionBank.length - 1; si > 0; si--) {
+  var sj = Math.floor(Math.random() * (si + 1));
+  var tmp = questionBank[si];
+  questionBank[si] = questionBank[sj];
+  questionBank[sj] = tmp;
+}
+
+console.log("✅ کۆی پرسیارەکان: " + questionBank.length);
+
+/* ============================================================
+   دۆخ
+   ============================================================ */
+var state = {
+  currentLevel: 1,
+  coins: 0,
+  unlockedLevels: 1,
+  volume: 0.5,
+  soundEnabled: true,
+  currentQuestion: null,
+  answered: false,
+  used5050: false,
+  usedSkip: false,
+  userEmail: ''
+};
+
+function saveState() {
+  try {
+    localStorage.setItem('amenit_state', JSON.stringify({
+      currentLevel: state.currentLevel,
+      coins: state.coins,
+      unlockedLevels: state.unlockedLevels,
+      volume: state.volume,
+      soundEnabled: state.soundEnabled,
+      userEmail: state.userEmail
+    }));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    var s = localStorage.getItem('amenit_state');
+    if (s) {
+      var d = JSON.parse(s);
+      state.currentLevel = d.currentLevel || 1;
+      state.coins = d.coins || 0;
+      state.unlockedLevels = d.unlockedLevels || 1;
+      state.volume = d.volume != null ? d.volume : 0.5;
+      state.soundEnabled = d.soundEnabled != null ? d.soundEnabled : true;
+      state.userEmail = d.userEmail || '';
+      document.getElementById('volume').value = state.volume * 100;
+      document.getElementById('volVal').textContent = Math.round(state.volume * 100);
+      document.getElementById('soundToggle').checked = state.soundEnabled;
+    }
+  } catch(e) {}
+}
+
+/* ============================================================
+   ساوند
+   ============================================================ */
+var audioCtx = null;
+function getCtx() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  }
+  return audioCtx;
+}
+
+function playTone(freq, dur, type) {
+  if (!state.soundEnabled) return;
+  try {
+    var ctx = getCtx();
+    if (!ctx) return;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = state.volume * 0.3;
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + dur);
+  } catch(e) {}
+}
+
+function playCorrect() {
+  playTone(660, 0.15);
+  setTimeout(function() { playTone(880, 0.2); }, 120);
+  setTimeout(function() { playTone(1100, 0.3); }, 260);
+}
+
+function playWrong() {
+  playTone(220, 0.4, 'sawtooth');
+  setTimeout(function() { playTone(150, 0.5, 'sawtooth'); }, 200);
+}
+
+function changeVolume(v) {
+  state.volume = v / 100;
+  document.getElementById('volVal').textContent = v;
+  saveState();
+}
+
+function toggleSettings() {
+  document.getElementById('settingsPanel').classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+  var panel = document.getElementById('settingsPanel');
+  var btn = document.querySelector('.settings-btn');
+  if (panel && btn && !panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.classList.remove('open');
+  }
+});
+
+document.getElementById('soundToggle').addEventListener('change', function(e) {
+  state.soundEnabled = e.target.checked;
+  saveState();
+});
+
+/* ============================================================
+   دەستپێکردن
+   ============================================================ */
+function startGame() {
+  var input = document.getElementById('emailInput');
+  var email = (input.value || '').trim();
+  var errBox = document.getElementById('emailError');
+
+  if (email.length < 3) {
+    errBox.textContent = '⚠️ تکایە ئیمێلەکەت بنووسە';
+    input.focus();
+    return;
+  }
+  if (email.indexOf('@') === -1 || email.indexOf('.') === -1) {
+    errBox.textContent = '⚠️ پێویستە @ و . ی تێدا بێت — نموونە: ali@gmail.com';
+    input.focus();
+    return;
+  }
+
+  errBox.textContent = '';
+  state.userEmail = email;
+  saveState();
+
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('gameScreen').classList.add('active');
+  document.getElementById('levelsSection').classList.add('active');
+
+  var bar = document.getElementById('userEmailBar');
+  bar.classList.add('active');
+  document.getElementById('userEmailDisplay').textContent = email;
+
+  loadLevel(state.currentLevel || 1);
+}
+
+// پەیوەستکردنی دوگمەکە
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('emailInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') startGame();
+});
+
+/* ============================================================
+   پرسیار
+   ============================================================ */
+function shuffleWithSeed(arr, seed) {
+  var a = arr.slice();
+  var s = seed * 9301 + 49297;
+  for (var i = a.length - 1; i > 0; i--) {
+    s = (s * 9301 + 49297) % 233280;
+    var j = Math.floor((s / 233280) * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function getQuestionForLevel(level) {
+  var idx = (level - 1) % questionBank.length;
+  var base = questionBank[idx];
+  var opts = shuffleWithSeed([base.a].concat(base.w), level);
+  return { q: base.q, correct: base.a, options: opts };
+}
+
+function loadLevel(level) {
+  state.currentLevel = level;
+  state.answered = false;
+  state.used5050 = false;
+  state.usedSkip = false;
+
+  var q = getQuestionForLevel(level);
+  state.currentQuestion = q;
+
+  document.getElementById('levelNum').textContent = level;
+  document.getElementById('coinNum').textContent = state.coins;
+  document.getElementById('progressFill').style.width = ((level - 1) / 1000 * 100) + '%';
+  document.getElementById('questionText').textContent = q.q;
+
+  var box = document.getElementById('optionsBox');
+  box.innerHTML = '';
+  for (var i = 0; i < q.options.length; i++) {
+    var opt = q.options[i];
+    var div = document.createElement('div');
+    div.className = 'option';
+    div.textContent = opt;
+    (function(d, o) {
+      d.onclick = function() { checkAnswer(d, o); };
+    })(div, opt);
+    box.appendChild(div);
+  }
+
+  document.getElementById('help5050').disabled = false;
+  document.getElementById('helpSkip').disabled = false;
+
+  renderLevels();
+  saveState();
+}
+
+function checkAnswer(el, choice) {
+  if (state.answered) return;
+  state.answered = true;
+
+  var correct = state.currentQuestion.correct;
+  var allOpts = document.querySelectorAll('.option');
+  for (var i = 0; i < allOpts.length; i++) {
+    allOpts[i].classList.add('disabled');
+  }
+
+  if (choice === correct) {
+    el.classList.add('correct');
+    playCorrect();
+    state.coins += 20;
+    document.getElementById('coinNum').textContent = state.coins;
+
+    if (state.currentLevel + 1 > state.unlockedLevels) {
+      state.unlockedLevels = state.currentLevel + 1;
+    }
+
+    setTimeout(function() {
+      if (state.currentLevel >= 1000) {
+        showModal('🎉 پیرۆزە!', 'تەواوی ١٠٠٠ پرسیارت تەواو کرد!');
+      } else {
+        loadLevel(state.currentLevel + 1);
+      }
+    }, 800);
+  } else {
+    el.classList.add('wrong');
+    playWrong();
+    for (var j = 0; j < allOpts.length; j++) {
+      if (allOpts[j].textContent === correct) {
+        allOpts[j].classList.add('correct');
+      }
+    }
+    setTimeout(function() {
+      showModal('❌ هەڵە!', 'وەڵامی ڕاست: <b>' + correct + '</b><br>دووبارە هەوڵبدە');
+    }, 900);
+  }
+  saveState();
+}
+
+function use5050() {
+  if (state.used5050 || state.coins < 20 || state.answered) return;
+  state.used5050 = true;
+  state.coins -= 20;
+  document.getElementById('coinNum').textContent = state.coins;
+  document.getElementById('help5050').disabled = true;
+
+  var correct = state.currentQuestion.correct;
+  var wrongs = [];
+  for (var i = 0; i < state.currentQuestion.options.length; i++) {
+    if (state.currentQuestion.options[i] !== correct) {
+      wrongs.push(state.currentQuestion.options[i]);
+    }
+  }
+  var toRemove = wrongs.slice(0, 2);
+
+  var allOpts = document.querySelectorAll('.option');
+  for (var j = 0; j < allOpts.length; j++) {
+    if (toRemove.indexOf(allOpts[j].textContent) !== -1) {
+      allOpts[j].classList.add('hidden5050');
+      allOpts[j].style.pointerEvents = 'none';
+    }
+  }
+  saveState();
+}
+
+function skipQuestion() {
+  if (state.usedSkip || state.coins < 30 || state.answered) return;
+  state.usedSkip = true;
+  state.coins -= 30;
+  document.getElementById('coinNum').textContent = state.coins;
+  document.getElementById('helpSkip').disabled = true;
+
+  if (state.currentLevel + 1 > state.unlockedLevels) {
+    state.unlockedLevels = state.currentLevel + 1;
+  }
+  loadLevel(state.currentLevel + 1);
+}
+
+// پەیوەستکردنی دوگمەکانی یارمەتی
+document.getElementById('help5050').addEventListener('click', use5050);
+document.getElementById('helpSkip').addEventListener('click', skipQuestion);
+
+/* ============================================================
+   مەرحەلەکان
+   ============================================================ */
+function renderLevels() {
+  var grid = document.getElementById('levelsGrid');
+  if (grid.children.length === 0) {
+    for (var i = 1; i <= 1000; i++) {
+      var d = document.createElement('div');
+      d.className = 'level-item';
+      d.dataset.level = i;
+      d.innerHTML = '<span>' + i + '</span>';
+      (function(lv, el) {
+        el.onclick = function() {
+          if (lv <= state.unlockedLevels) loadLevel(lv);
+        };
+      })(i, d);
+      grid.appendChild(d);
+    }
+  }
+  var items = grid.children;
+  for (var k = 0; k < items.length; k++) {
+    var item = items[k];
+    var lv = parseInt(item.dataset.level);
+    item.classList.remove('locked', 'unlocked', 'current');
+    if (lv === state.currentLevel) {
+      item.classList.add('current');
+      item.innerHTML = '<span>' + lv + '</span>';
+    } else if (lv <= state.unlockedLevels) {
+      item.classList.add('unlocked');
+      item.innerHTML = '<span>' + lv + '</span>';
+    } else {
+      item.classList.add('locked');
+      item.innerHTML = '';
+    }
+  }
+  document.getElementById('unlockedCount').textContent = state.unlockedLevels;
+}
+
+/* ============================================================
+   مۆدال
+   ============================================================ */
+function showModal(title, text) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalText').innerHTML = text;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  loadLevel(state.currentLevel);
+}
+
+/* ============================================================
+   دەستپێکردن
+   ============================================================ */
+loadState();
+if (state.userEmail) {
+  document.getElementById('emailInput').value = state.userEmail;
+}
+</script>
+</body>
+</html>
